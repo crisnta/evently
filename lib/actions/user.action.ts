@@ -14,8 +14,11 @@ import Event from '../database/models/event.model'
 export async function createUser(user: CreateUserParams) {
   try {
     await connectToDatabase()
+    console.log('USE SERVER CONNECT DB')
 
-    const newUser = await User.create(user)
+    const newUser = new User(user)
+    await newUser.save()
+    
     return JSON.parse(JSON.stringify(newUser))
   } catch (error) {
     handleError(error)
