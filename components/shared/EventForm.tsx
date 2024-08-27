@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation"
 //import { createEvent, updateEvent } from "@/lib/actions/event.actions"
 import { IEvent } from "@/lib/database/models/event.model"
 import { Checkbox } from "../ui/checkbox"
-import { createEvent } from "@/lib/actions/event.action"
+import { createEvent } from "@/lib/actions/event.actions"
 
 
 type EventFormProps = {
