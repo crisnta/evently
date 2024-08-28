@@ -33,6 +33,7 @@ type EventFormProps = {
 }
 
 const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
+  console.log('event', event)
   const [files, setFiles] = useState<File[]>([])
   const initialValues = event && type === 'Update' 
     ? { 
@@ -47,7 +48,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: initialValues
+    defaultValues: eventDefaultValues
   })
  
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
