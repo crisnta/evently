@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation"
 //import { createEvent, updateEvent } from "@/lib/actions/event.actions"
 import { IEvent } from "@/lib/database/models/event.model"
 import { Checkbox } from "../ui/checkbox"
-import { createEvent } from "@/lib/actions/event.actions"
+import { createEvent, updateEvent } from "@/lib/actions/event.actions"
 
 
 type EventFormProps = {
@@ -32,9 +32,9 @@ type EventFormProps = {
   eventId?: string
 }
 
-const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
-  console.log('event', event)
+const EventForm = ({ userId, type, event, eventId}: EventFormProps) => {
   const [files, setFiles] = useState<File[]>([])
+  console.log('type', type)
   const initialValues = event && type === 'Update' 
     ? { 
       ...event, 
@@ -48,7 +48,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: eventDefaultValues
+    defaultValues: initialValues
   })
  
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
@@ -66,11 +66,13 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
     if(type === 'Create') {
       try {
+        console.log('create event', values)
         const newEvent = await createEvent({
           event: { ...values, imageUrl: uploadedImageUrl },
           userId,
           path: '/profile'
         })
+        console.log('evento creado', newEvent)
 
         if(newEvent) {
           form.reset();
@@ -81,27 +83,27 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
       }
     }
 
-    // if(type === 'Update') {
-    //   if(!eventId) {
-    //     router.back()
-    //     return;
-    //   }
+    if(type === 'Update') {
+      if(!eventId) {
+        router.back()
+        return;
+      }
 
-    //   try {
-    //     const updatedEvent = await updateEvent({
-    //       userId,
-    //       event: { ...values, imageUrl: uploadedImageUrl, _id: eventId },
-    //       path: `/events/${eventId}`
-    //     })
+      try {
+        const updatedEvent = await updateEvent({
+          userId,
+          event: { ...values, imageUrl: uploadedImageUrl, _id: eventId },
+          path: `/events/${eventId}`
+        })
 
-    //     if(updatedEvent) {
-    //       form.reset();
-    //       router.push(`/events/${updatedEvent._id}`)
-    //     }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
+        if(updatedEvent) {
+          form.reset();
+          router.push(`/events/${updatedEvent._id}`)
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 
   return (
@@ -168,7 +170,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
         <div className="flex flex-col gap-5 md:flex-row">
           <FormField
               control={form.control}
-              name="location"
+              name="locations"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormControl>
