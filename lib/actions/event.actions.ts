@@ -1,6 +1,6 @@
 "use server"
 
-import { CreateEventParams, DeleteEventParams, GetAllEventsParams, GetRelatedEventsByCategoryParams, UpdateEventParams } from "@/types"
+import { CreateEventParams, DeleteEventParams, GetAllEventsParams, GetEventsByUserParams, GetRelatedEventsByCategoryParams, UpdateEventParams } from "@/types"
 import { handleError } from "../utils"
 import { connectToDatabase } from "../database"
 import User from "../database/models/user.model"
@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 import { revalidatePath } from "next/cache"
 
 const populateEvent = async (query: any) =>{
-    return await query
+    return query
         .populate({
             path: 'organizer',
             model: User,
@@ -155,3 +155,27 @@ export async function getRelatedEventsByCategory({
     }
   }
 
+// GET EVENTS BY ORGANIZER
+export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
+    try {
+      await connectToDatabase()
+  
+      const skipAmount = (page - 1) * limit
+      
+      const userClerkId = await User.findOne({ clerkId: userId})
+      const conditions = { organizer: userClerkId._id.toString()}
+
+      const eventsQuery = Event.find(conditions)
+      .sort({ createdAt: 'desc' })
+      .skip(skipAmount)
+      .limit(limit)
+      
+      const events = await populateEvent(eventsQuery)
+      const eventsCount = await Event.countDocuments(conditions)
+
+      return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+    } catch (error) {
+      handleError(error)
+    }
+  }
+  

@@ -29,6 +29,7 @@ export async function getUserById(userId: string) {
     await connectToDatabase()
 
     const user = await User.findById(userId)
+    console.log('USER')
 
     if (!user) throw new Error('User not found')
     return JSON.parse(JSON.stringify(user))
